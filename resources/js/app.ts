@@ -2,6 +2,7 @@ import { createInertiaApp } from '@inertiajs/vue3';
 import ui from '@nuxt/ui/vue-plugin';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { createApp, h, type DefineComponent } from 'vue';
+import './Plugins/yup';
 
 const appName = window.document.getElementsByTagName('title')[0]?.innerText || 'Laravel';
 

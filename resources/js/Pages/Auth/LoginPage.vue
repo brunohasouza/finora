@@ -1,6 +1,17 @@
 <template>
     <UPageCard class="w-full max-w-md">
-        <UAuthForm title="Acesse sua conta" icon="i-lucide-user" :fields="fields" @submit="onSubmit" :schema="schema">
+        <UAuthForm
+            title="Acesse sua conta"
+            description="Insira seus dados para acessar sua conta."
+            icon="i-lucide-user"
+            :fields="fields"
+            :schema="schema"
+            :submit="{ label: 'Entrar', size: 'lg' }"
+            @submit="onSubmit"
+        >
+            <template #password-hint>
+                <Link href="/forgot-password" class="text-sm font-bold text-primary-600 hover:underline">Esqueceu sua senha?</Link>
+            </template>
             <template #footer>
                 <div class="text-center text-sm">
                     Não possui uma conta?
@@ -13,7 +24,6 @@
 
 <script setup lang="ts">
 import AuthLayout from '@/Layouts/AuthLayout.vue';
-import { VALIDATION_MESSAGES } from '@/utils/constants';
 import { Link } from '@inertiajs/vue3';
 import type { AuthFormField, FormSubmitEvent } from '@nuxt/ui';
 import * as y from 'yup';
@@ -40,11 +50,11 @@ const fields: AuthFormField[] = [
 ];
 
 const schema = y.object({
-    email: y.string().required(VALIDATION_MESSAGES.REQUIRED_FIELD).email(VALIDATION_MESSAGES.INVALID_EMAIL),
-    password: y.string().required(VALIDATION_MESSAGES.REQUIRED_FIELD),
+    email: y.string().required().email(),
+    password: y.string().required(),
 });
 
-function onSubmit(payload: FormSubmitEvent<any>) {
+function onSubmit(payload: FormSubmitEvent<y.InferType<typeof schema>>) {
     console.log('Submitted', payload);
 }
 </script>
