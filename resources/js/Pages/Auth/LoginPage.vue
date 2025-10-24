@@ -13,28 +13,31 @@
 </template>
 
 <script setup lang="ts">
-    import type { FormSubmitEvent, AuthFormField } from '@nuxt/ui'
-    import BlankLayout from '@/Layouts/BlankLayout.vue';
+import BlankLayout from '@/Layouts/BlankLayout.vue';
+import type { AuthFormField, FormSubmitEvent } from '@nuxt/ui';
 
-    defineOptions({
-        layout: BlankLayout
-    })
+defineOptions({
+    layout: BlankLayout,
+});
 
-    const fields: AuthFormField[] = [{
+const fields: AuthFormField[] = [
+    {
         name: 'email',
         type: 'email',
         label: 'Email',
         placeholder: 'Enter your email',
-        required: true
-    }, {
+        required: true,
+    },
+    {
         name: 'password',
         label: 'Password',
         type: 'password',
         placeholder: 'Enter your password',
-        required: true
-    }]
+        required: true,
+    },
+];
 
-    function onSubmit(payload: FormSubmitEvent<any>) {
-        console.log('Submitted', payload)
-    }
+function onSubmit(payload: FormSubmitEvent<any>) {
+    console.log('Submitted', payload);
+}
 </script>
