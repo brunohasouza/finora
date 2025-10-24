@@ -2,12 +2,14 @@
     <Head title="Crie sua conta" />
     <UPageCard class="w-full max-w-md">
         <UAuthForm
+            ref="authForm"
             title="Crie sua conta"
             description="Cadastre-se e comece a gerenciar suas finanças hoje mesmo."
             icon="i-lucide-user-plus"
             :fields="fields"
             :submit="{ label: 'Cadastrar', size: 'lg' }"
             :schema="schema"
+            :loading="form.processing"
             @submit="onSubmit"
         >
             <template #footer>
@@ -21,14 +23,29 @@
 </template>
 
 <script setup lang="ts">
+import { useFormErrors } from '@/Composables';
 import AuthLayout from '@/Layouts/AuthLayout.vue';
-import { Head, Link } from '@inertiajs/vue3';
+import { Head, Link, router, useForm } from '@inertiajs/vue3';
 import type { AuthFormField, FormSubmitEvent } from '@nuxt/ui';
+import { useTemplateRef } from 'vue';
 import * as y from 'yup';
 
 defineOptions({
     layout: AuthLayout,
 });
+
+const schema = y.object({
+    name: y.string().required(),
+    email: y.string().required().email(),
+    password: y.string().required().min(12),
+    password_confirmation: y
+        .string()
+        .oneOf([y.ref('password')], 'As senhas devem coincidir')
+        .required(),
+});
+
+type Schema = y.InferType<typeof schema>;
+const authForm = useTemplateRef('authForm');
 
 const fields: AuthFormField[] = [
     {
@@ -61,17 +78,19 @@ const fields: AuthFormField[] = [
     },
 ];
 
-const schema = y.object({
-    name: y.string().required(),
-    email: y.string().required().email(),
-    password: y.string().required().min(12),
-    password_confirmation: y
-        .string()
-        .oneOf([y.ref('password')], 'As senhas devem coincidir')
-        .required(),
+const form = useForm<Schema>({
+    name: '',
+    email: '',
+    password: '',
+    password_confirmation: '',
 });
 
-function onSubmit(payload: FormSubmitEvent<y.InferType<typeof schema>>) {
-    console.log('Submitted', payload);
+router.on('error', (errors) => {
+    authForm.value!.formRef!.setErrors(useFormErrors(errors.detail.errors));
+});
+
+function onSubmit(payload: FormSubmitEvent<Schema>) {
+    form.defaults(payload.data).reset();
+    form.post('/register');
 }
 </script>

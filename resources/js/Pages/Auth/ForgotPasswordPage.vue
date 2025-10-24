@@ -10,7 +10,7 @@
             :fields="fields"
             @submit="onSubmit"
         >
-            <template #foooter>
+            <template #footer>
                 <div class="text-center text-sm">
                     Lembrou sua senha?
                     <Link href="/login" class="font-bold text-primary-600 hover:underline">Acesse aqui</Link>
