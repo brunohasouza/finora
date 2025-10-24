@@ -22,3 +22,6 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+# Auto-generated type declarations
+auto-imports.d.ts
+components.d.ts

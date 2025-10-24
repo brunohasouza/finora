@@ -3,12 +3,17 @@
   "include": [ 
     "resources/**/*.ts",
     "resources/**/*.d.ts",
-    "resources/**/*.vue"
+    "resources/**/*.vue",
+    "auto-imports.d.ts",
+    "components.d.ts"
   ],
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@/*": ["resources/js/*"]
+      "@/*": ["resources/js/*"],
+      "#build/ui": [
+        "./node_modules/@nuxt/ui/.nuxt/ui"
+      ]
     },
     "types": ["vite/client"]
   }

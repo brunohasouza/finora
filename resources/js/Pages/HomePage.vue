@@ -1,12 +1,14 @@
 <template>
-    <h1>Hello World</h1>
-    <p>{{ title }}</p>
+    <UDashboardPanel>
+        <template #body>
+            <h1>Hello World</h1>
+        </template>
+    </UDashboardPanel>
 </template>
 
 <script lang="ts" setup>
-    type Props = {
-        title: string;
-    };
-
-    defineProps<Props>();
+import DashboardLayout from '@/Layouts/DashboardLayout.vue';
+defineOptions({
+    layout: DashboardLayout,
+})
 </script>

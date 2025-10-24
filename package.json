@@ -3,7 +3,7 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "build": "npm run type-check && vite build", 
+        "build": "npm run type-check && vite build",
         "type-check": "vue-tsc --noEmit",
         "dev": "vite"
     },
@@ -18,7 +18,10 @@
     },
     "dependencies": {
         "@inertiajs/vue3": "^2.2.10",
+        "@nuxt/ui": "^4.1.0",
+        "@tailwindcss/vite": "^4.1.16",
         "@vitejs/plugin-vue": "^6.0.1",
+        "tailwindcss": "^4.1.16",
         "vue": "^3.5.22"
     }
 }
