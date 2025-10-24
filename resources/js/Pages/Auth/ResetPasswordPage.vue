@@ -1,4 +1,5 @@
 <template>
+    <Head title="Redefinir senha" />
     <UPageCard class="w-full max-w-md">
         <UAuthForm
             title="Redefinir sua senha"
@@ -21,7 +22,7 @@
 
 <script setup lang="ts">
 import AuthLayout from '@/Layouts/AuthLayout.vue';
-import { Link } from '@inertiajs/vue3';
+import { Head, Link } from '@inertiajs/vue3';
 import type { AuthFormField, FormSubmitEvent } from '@nuxt/ui';
 import * as y from 'yup';
 

@@ -1,4 +1,5 @@
 <template>
+    <Head title="Esqueceu sua senha?" />
     <UPageCard class="w-full max-w-md">
         <UAuthForm
             title="Esqueceu sua senha?"
@@ -21,6 +22,7 @@
 
 <script setup lang="ts">
 import AuthLayout from '@/Layouts/AuthLayout.vue';
+import { Head, Link } from '@inertiajs/vue3';
 import { AuthFormField, FormSubmitEvent } from '@nuxt/ui';
 import * as y from 'yup';
 
