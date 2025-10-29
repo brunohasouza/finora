@@ -2,6 +2,7 @@
     <Head title="Acesse sua conta" />
     <UPageCard class="w-full max-w-md">
         <UAuthForm
+            ref="authForm"
             title="Acesse sua conta"
             description="Insira seus dados para acessar sua conta."
             icon="i-lucide-user"
@@ -24,14 +25,24 @@
 </template>
 
 <script setup lang="ts">
+import { useFormErrors } from '@/Composables';
 import AuthLayout from '@/Layouts/AuthLayout.vue';
-import { Head, Link } from '@inertiajs/vue3';
+import { Head, Link, router, useForm } from '@inertiajs/vue3';
 import type { AuthFormField, FormSubmitEvent } from '@nuxt/ui';
+import { useTemplateRef } from 'vue';
 import * as y from 'yup';
 
 defineOptions({
     layout: AuthLayout,
 });
+
+const schema = y.object({
+    email: y.string().required().email(),
+    password: y.string().required(),
+});
+
+type Schema = y.InferType<typeof schema>;
+const authForm = useTemplateRef('authForm');
 
 const fields: AuthFormField[] = [
     {
@@ -50,12 +61,17 @@ const fields: AuthFormField[] = [
     },
 ];
 
-const schema = y.object({
-    email: y.string().required().email(),
-    password: y.string().required(),
+const form = useForm<Schema>({
+    email: '',
+    password: '',
 });
 
-function onSubmit(payload: FormSubmitEvent<y.InferType<typeof schema>>) {
-    console.log('Submitted', payload);
+router.on('error', (errors) => {
+    authForm.value!.formRef!.setErrors(useFormErrors(errors.detail.errors));
+});
+
+function onSubmit(payload: FormSubmitEvent<Schema>) {
+    form.defaults(payload.data).reset();
+    form.post('/login');
 }
 </script>
