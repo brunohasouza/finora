@@ -37,7 +37,7 @@ defineOptions({
 const schema = y.object({
     name: y.string().required(),
     email: y.string().required().email(),
-    password: y.string().required().min(12),
+    password: y.string().required().min(8),
     password_confirmation: y
         .string()
         .oneOf([y.ref('password')], 'As senhas devem coincidir')
