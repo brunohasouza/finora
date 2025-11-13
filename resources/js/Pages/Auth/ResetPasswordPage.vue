@@ -2,12 +2,14 @@
     <Head title="Redefinir senha" />
     <UPageCard class="w-full max-w-md">
         <UAuthForm
+            ref="authForm"
             title="Redefinir sua senha"
             description="Insira sua nova senha abaixo."
             icon="i-lucide-key"
             :fields="fields"
             :schema="schema"
             :submit="{ label: 'Redefinir Senha', size: 'lg' }"
+            :loading="form.processing"
             @submit="onSubmit"
         >
             <template #footer>
@@ -21,13 +23,37 @@
 </template>
 
 <script setup lang="ts">
+import { useFormErrors } from '@/Composables';
 import AuthLayout from '@/Layouts/AuthLayout.vue';
-import { Head, Link } from '@inertiajs/vue3';
+import { Head, Link, router, useForm } from '@inertiajs/vue3';
 import type { AuthFormField, FormSubmitEvent } from '@nuxt/ui';
+import { useTemplateRef } from 'vue';
 import * as y from 'yup';
 
 defineOptions({
     layout: AuthLayout,
+});
+
+const props = defineProps({
+    token: String,
+    email: String,
+});
+
+const schema = y.object({
+    password: y.string().required().min(8),
+    password_confirmation: y
+        .string()
+        .oneOf([y.ref('password')], 'As senhas devem coincidir')
+        .required(),
+});
+
+type Schema = y.InferType<typeof schema>;
+const authForm = useTemplateRef('authForm');
+const form = useForm<Schema & { token: string; email: string }>({
+    token: props.token ?? '',
+    email: props.email ?? '',
+    password: '',
+    password_confirmation: '',
 });
 
 const fields: AuthFormField[] = [
@@ -47,15 +73,12 @@ const fields: AuthFormField[] = [
     },
 ];
 
-const schema = y.object({
-    password: y.string().required().min(12),
-    password_confirmation: y
-        .string()
-        .oneOf([y.ref('password')], 'As senhas devem coincidir')
-        .required(),
+router.on('error', (errors) => {
+    authForm.value!.formRef!.setErrors(useFormErrors(errors.detail.errors));
 });
 
-const onSubmit = (payload: FormSubmitEvent<y.InferType<typeof schema>>) => {
-    console.log('Submitted', payload);
+const onSubmit = (payload: FormSubmitEvent<Schema>) => {
+    form.defaults(payload.data).reset();
+    form.post('/reset-password');
 };
 </script>
