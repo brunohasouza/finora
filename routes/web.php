@@ -1,7 +1,8 @@
 <?php
 
 use App\Http\Controllers\AuthController;
-use Illuminate\Http\Request;
+use App\Http\Controllers\ForgotPasswordController;
+use App\Http\Controllers\ResetPasswordController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -14,27 +15,15 @@ Route::middleware(['auth'])->group(function () {
 });
 
 Route::middleware(['guest'])->group(function() {
-    Route::get('/login', function() {
-        return Inertia::render('Auth/LoginPage');
-    })->name('login');
-
+    Route::get('/login', [AuthController::class, 'loginPage'])->name('login');
     Route::post('/login', [AuthController::class, 'login']);
 
-    Route::get('/register', function() {
-        return Inertia::render('Auth/RegisterPage');
-    })->name('register');
-
+    Route::get('/register', [AuthController::class, 'registerPage'])->name('register');
     Route::post('/register', [AuthController::class, 'register']);
 
-    Route::get('/forgot-password', function() {
-        return Inertia::render('Auth/ForgotPasswordPage', ['status' => session('status')]);
-    })->name('password.request');
+    Route::get('/forgot-password', [ForgotPasswordController::class, 'forgotPasswordPage'])->name('password.request');
+    Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
 
-    Route::post('/forgot-password', [AuthController::class, 'sendResetLinkEmail'])->name('password.email');
-
-    Route::get('/reset-password/{token}', function($token, Request $request) {
-        return Inertia::render('Auth/ResetPasswordPage', [ 'token' => $token,  'email' => $request->email ]);
-    })->name('password.reset');
-
-    Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
+    Route::get('/reset-password/{token}', [ResetPasswordController::class, 'resetPasswordPage'])->name('password.reset');
+    Route::post('/reset-password', [ResetPasswordController::class, 'resetPassword'])->name('password.update');
 });

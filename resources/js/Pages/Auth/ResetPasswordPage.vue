@@ -27,6 +27,7 @@ import { useFormErrors } from '@/Composables';
 import AuthLayout from '@/Layouts/AuthLayout.vue';
 import { Head, Link, router, useForm } from '@inertiajs/vue3';
 import type { AuthFormField, FormSubmitEvent } from '@nuxt/ui';
+import { useToast } from '@nuxt/ui/runtime/composables/useToast.js';
 import { useTemplateRef } from 'vue';
 import * as y from 'yup';
 
@@ -38,6 +39,8 @@ const props = defineProps({
     token: String,
     email: String,
 });
+
+const toast = useToast();
 
 const schema = y.object({
     password: y.string().required().min(8),
@@ -79,6 +82,14 @@ router.on('error', (errors) => {
 
 const onSubmit = (payload: FormSubmitEvent<Schema>) => {
     form.defaults(payload.data).reset();
-    form.post('/reset-password');
+    form.post('/reset-password', {
+        onSuccess: () => {
+            toast.add({
+                title: 'Senha redefinida com sucesso!',
+                description: 'Você já pode acessar sua conta com a nova senha.',
+                color: 'success',
+            });
+        },
+    });
 };
 </script>
