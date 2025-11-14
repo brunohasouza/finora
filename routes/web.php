@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ForgotPasswordController;
 use App\Http\Controllers\ResetPasswordController;
 use Illuminate\Support\Facades\Route;
@@ -12,6 +13,7 @@ Route::middleware(['auth'])->group(function () {
     })->name('home');
 
     Route::post('/logout', [AuthController::class, 'logout']);
+    Route::get('/categories', [CategoryController::class, 'categoryPage'])->name('categories');
 });
 
 Route::middleware(['guest'])->group(function() {

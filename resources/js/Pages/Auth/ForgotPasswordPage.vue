@@ -37,9 +37,9 @@ defineOptions({
     layout: AuthLayout,
 });
 
-defineProps({
-    status: String,
-});
+defineProps<{
+    status?: string;
+}>();
 
 const schema = y.object({
     email: y.string().required().email(),

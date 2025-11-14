@@ -1,25 +1,26 @@
 <template>
+    <Head title="Categorias" />
     <UDashboardPanel>
         <template #header>
-            <UDashboardNavbar :title="`Olá, ${userName}`">
+            <UDashboardNavbar title="Categorias">
                 <template #leading>
                     <UDashboardSidebarCollapse />
+                </template>
+                <template #right>
+                    <UButton color="primary" size="sm" icon="i-lucide-plus">Nova Categoria</UButton>
                 </template>
             </UDashboardNavbar>
         </template>
     </UDashboardPanel>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 import DashboardLayout from '@/Layouts/DashboardLayout.vue';
-import { PageProps } from '@/types';
-import { usePage } from '@inertiajs/vue3';
-import { computed } from 'vue';
+import { Head } from '@inertiajs/vue3';
 
 defineOptions({
     layout: DashboardLayout,
 });
-
-const page = usePage<PageProps>();
-const userName = computed(() => page.props!.auth!.user!.name);
 </script>
+
+<style scoped></style>

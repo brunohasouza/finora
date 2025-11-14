@@ -35,10 +35,10 @@ defineOptions({
     layout: AuthLayout,
 });
 
-const props = defineProps({
-    token: String,
-    email: String,
-});
+const props = defineProps<{
+    token?: string;
+    email?: string;
+}>();
 
 const toast = useToast();
 
