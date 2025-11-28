@@ -42,7 +42,7 @@ class CategoryController extends Controller
 
         $request->user()->categories()->create($fields);
 
-        return redirect()->route('categories.index')->with('success', 'Categoria criada com sucesso.');
+        return redirect()->route('categories.index', request()->query())->with('success', 'Categoria criada com sucesso.');
     }
 
     public function show($id)
@@ -66,11 +66,14 @@ class CategoryController extends Controller
         $category = $request->user()->categories()->findOrFail($id);
         $category->update($fields);
 
-        return redirect()->route('categories.index')->with('success', 'Categoria atualizada com sucesso.');
+        return redirect()->route('categories.index', request()->query())->with('success', 'Categoria atualizada com sucesso.');
     }
 
     public function destroy($id)
     {
-        // delete category
+        $category = Auth::user()->categories()->findOrFail($id);
+        $category->delete();
+
+        return redirect()->route('categories.index', request()->query())->with('success', 'Categoria excluída com sucesso.');
     }
 }

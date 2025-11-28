@@ -80,11 +80,15 @@ const types = ref<SelectItem[]>([
 const errorMessage = ref('');
 
 function onSubmit(_: FormSubmitEvent<Schema>) {
+    const query = window.location.search;
     const url = props.category ? `/categories/${props.category.id}` : '/categories';
     const successDesc = props.category ? 'Categoria atualizada com sucesso.' : 'Categoria criada com sucesso.';
     const method = props.category ? 'put' : 'post';
 
-    state.submit(method, url, {
+    state.submit(method, `${url}${query}`, {
+        preserveState: true,
+        preserveScroll: true,
+        replace: true,
         onSuccess: () => {
             emits('close', false);
 
@@ -95,7 +99,6 @@ function onSubmit(_: FormSubmitEvent<Schema>) {
                 icon: 'i-lucide-check-circle',
             });
         },
-
         onError: (errors) => {
             console.error(errors);
             errorMessage.value = 'Ocorreu um erro ao salvar a categoria.';
