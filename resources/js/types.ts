@@ -21,6 +21,22 @@ export type Category = {
     updated_at: Date | string;
 };
 
+export type CategoryResponse = {
+    current_page: number;
+    data: Category[];
+    first_page_url: string;
+    from: number;
+    last_page: number;
+    last_page_url: string;
+    links: { active: boolean; label: string; url: string | null; page: number | null }[];
+    next_page_url: string | null;
+    path: string;
+    per_page: number;
+    prev_page_url: string | null;
+    to: number;
+    total: number;
+};
+
 export enum CATEGORY_TYPE {
     INCOME = 'income',
     EXPENSE = 'expense',

@@ -12,9 +12,15 @@
             </UDashboardNavbar>
         </template>
         <template #body>
+            <div class="flex items-center justify-end">
+                <USelect v-model="type" :items="types" :ui="{ base: 'w-48 mr-4' }" @update:modelValue="search" />
+                <UForm :state="form" @submit="search">
+                    <UInput v-model="form.search" class="max-w-sm" type="search" icon="i-lucide-search" placeholder="Procurar categoria..." />
+                </UForm>
+            </div>
             <UTable
                 empty="Nenhuma categoria encontrada"
-                :data="categories || []"
+                :data="categories?.data || []"
                 :columns="columns"
                 :ui="{
                     base: 'table-fixed border-separate border-spacing-0',
@@ -25,6 +31,9 @@
                     separator: 'h-0',
                 }"
             />
+            <div class="mt-4 flex justify-end">
+                <UPagination v-model:page="page" :total="categories?.total ?? 0" size="lg" @update:page="to" />
+            </div>
         </template>
     </UDashboardPanel>
 </template>
@@ -32,18 +41,24 @@
 <script setup lang="ts">
 import CategoryAddModal from '@/Components/CategoryAddModal.vue';
 import CategoryDeleteModal from '@/Components/CategoryDeleteModal.vue';
-import { colors } from '@/constants';
 import DashboardLayout from '@/Layouts/DashboardLayout.vue';
-import { Category, CATEGORY_TYPE } from '@/types';
-import { faker } from '@faker-js/faker';
-import { Head } from '@inertiajs/vue3';
+import { Category, CATEGORY_TYPE, CategoryResponse } from '@/types';
+import { Head, router, useForm } from '@inertiajs/vue3';
 import type { TableColumn } from '@nuxt/ui';
 import { useOverlay } from '@nuxt/ui/runtime/composables/useOverlay.js';
-import { h, resolveComponent } from 'vue';
+import { h, ref, resolveComponent } from 'vue';
 
 defineOptions({
     layout: DashboardLayout,
 });
+
+const props = defineProps<{
+    categories: CategoryResponse | null;
+    searchTerm: string | null;
+    typeFilter: CATEGORY_TYPE | null;
+}>();
+
+console.log(props.categories);
 
 const overlay = useOverlay();
 const modalAdd = overlay.create(CategoryAddModal);
@@ -52,14 +67,16 @@ const UBadge = resolveComponent('UBadge');
 const UDropdownMenu = resolveComponent('UDropdownMenu');
 const UButton = resolveComponent('UButton');
 
-const categories: Category[] = Array.from({ length: faker.number.int({ min: 10, max: 20 }) }, () => ({
-    id: faker.number.int(),
-    name: faker.commerce.department(),
-    type: faker.helpers.enumValue(CATEGORY_TYPE),
-    color: faker.helpers.arrayElement(colors),
-    created_at: faker.date.past().toISOString(),
-    updated_at: faker.date.recent().toISOString(),
-}));
+const page = ref(props.categories?.current_page || 1);
+const form = useForm({
+    search: props.searchTerm,
+});
+const type = ref(props.typeFilter ?? 'all');
+const types = [
+    { label: 'Todas', value: 'all' },
+    { label: 'Receita', value: CATEGORY_TYPE.INCOME },
+    { label: 'Despesa', value: CATEGORY_TYPE.EXPENSE },
+];
 
 const columns: TableColumn<Category>[] = [
     {
@@ -154,6 +171,22 @@ const columns: TableColumn<Category>[] = [
             ),
     },
 ];
+
+function to(pageNumber: number) {
+    const link = props.categories?.links[pageNumber];
+
+    if (link?.active === false && link?.url) {
+        router.get(link.url, {});
+    }
+}
+
+const search = () => {
+    router.get(props.categories?.path ?? '', {
+        search: form.search || undefined,
+        page: 1,
+        type: type.value === CATEGORY_TYPE.INCOME || type.value === CATEGORY_TYPE.EXPENSE ? type.value : undefined,
+    });
+};
 </script>
 
 <style scoped></style>

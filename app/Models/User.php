@@ -48,4 +48,9 @@ class User extends Authenticatable implements CanResetPassword
             'password' => 'hashed',
         ];
     }
+
+    public function categories()
+    {
+        return $this->hasMany(Category::class);
+    }
 }

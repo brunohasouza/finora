@@ -13,7 +13,7 @@ Route::middleware(['auth'])->group(function () {
     })->name('home');
 
     Route::post('/logout', [AuthController::class, 'logout']);
-    Route::get('/categories', [CategoryController::class, 'categoryPage'])->name('categories');
+    Route::resource('categories', CategoryController::class);
 });
 
 Route::middleware(['guest'])->group(function() {
