@@ -1,5 +1,11 @@
 <template>
-    <UModal :title="title" :description="description" :close="{ onClick: () => emits('close', false) }" :ui="{ footer: 'justify-end' }">
+    <UModal
+        :dismissable="state.processing"
+        :title="title"
+        :description="description"
+        :close="{ onClick: () => emits('close', false) }"
+        :ui="{ footer: 'justify-end' }"
+    >
         <template #body>
             <UForm ref="form" :state="state" :schema="schema" class="grid grid-cols-2 gap-4" @submit="onSubmit">
                 <UFormField label="Nome" name="name" class="col-span-2">
@@ -21,10 +27,13 @@
                     </USelect>
                 </UFormField>
             </UForm>
+            <UAlert v-if="errorMessage" :description="errorMessage" icon="i-lucide-x-circle" color="error" class="mt-5" />
         </template>
         <template #footer>
-            <UButton color="neutral" variant="outline" size="sm" @click="emits('close', false)" icon="i-lucide-x">Cancelar</UButton>
-            <UButton color="primary" size="sm" icon="i-lucide-check" @click="form.submit()">Salvar</UButton>
+            <UButton color="neutral" variant="outline" size="sm" @click="emits('close', false)" :disabled="state.processing" icon="i-lucide-x"
+                >Cancelar</UButton
+            >
+            <UButton color="primary" size="sm" icon="i-lucide-check" @click="form.submit()" :disabled="state.processing">Salvar</UButton>
         </template>
     </UModal>
 </template>
@@ -34,6 +43,7 @@ import { colors } from '@/constants';
 import { Category, CATEGORY_TYPE } from '@/types';
 import { useForm } from '@inertiajs/vue3';
 import { FormSubmitEvent, SelectItem } from '@nuxt/ui';
+import { useToast } from '@nuxt/ui/runtime/composables/useToast.js';
 import { ref, useTemplateRef } from 'vue';
 import * as y from 'yup';
 
@@ -43,6 +53,7 @@ const props = defineProps<{
 }>();
 
 const form = useTemplateRef('form');
+const toast = useToast();
 
 const title = props.category ? 'Editar categoria' : 'Nova categoria';
 const description = props.category ? `Edite os detalhes da categoria '${props.category.name}'.` : 'Adicione uma nova categoria para suas transações.';
@@ -66,9 +77,30 @@ const types = ref<SelectItem[]>([
     { label: 'Despesa', value: CATEGORY_TYPE.EXPENSE },
 ]);
 
-function onSubmit(event: FormSubmitEvent<Schema>) {
-    console.log(event.data.color, event.data.name, event.data.type);
-    console.log(state.color, state.name, state.type);
+const errorMessage = ref('');
+
+function onSubmit(_: FormSubmitEvent<Schema>) {
+    const url = props.category ? `/categories/${props.category.id}` : '/categories';
+    const successDesc = props.category ? 'Categoria atualizada com sucesso.' : 'Categoria criada com sucesso.';
+    const method = props.category ? 'put' : 'post';
+
+    state.submit(method, url, {
+        onSuccess: () => {
+            emits('close', false);
+
+            toast.add({
+                title: 'Sucesso',
+                description: successDesc,
+                color: 'success',
+                icon: 'i-lucide-check-circle',
+            });
+        },
+
+        onError: (errors) => {
+            console.error(errors);
+            errorMessage.value = 'Ocorreu um erro ao salvar a categoria.';
+        },
+    });
 }
 </script>
 

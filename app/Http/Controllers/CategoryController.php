@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Category;
+use App\Enums\CategoryTypes;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rules\Enum;
 use Inertia\Inertia;
 
 class CategoryController extends Controller
@@ -24,5 +25,52 @@ class CategoryController extends Controller
             'searchTerm' => $request->search,
             'typeFilter' => $request->type,
         ]);
+    }
+
+    public function create()
+    {
+        // render creation page
+    }
+
+    public function store(Request $request)
+    {
+        $fields = $request->validate([
+            'name' => ['required','string', 'max:255'],
+            'type' => ['required', new Enum(CategoryTypes::class)],
+            'color' => ['required', 'string', 'max:7'],
+        ]);
+
+        $request->user()->categories()->create($fields);
+
+        return redirect()->route('categories.index')->with('success', 'Categoria criada com sucesso.');
+    }
+
+    public function show($id)
+    {
+        // render details page
+    }
+
+    public function edit($id)
+    {
+        // render editing page
+    }
+
+    public function update(Request $request, $id)
+    {
+        $fields = $request->validate([
+            'name' => ['required','string', 'max:255'],
+            'type' => ['required', new Enum(CategoryTypes::class)],
+            'color' => ['required', 'string', 'max:7'],
+        ]);
+
+        $category = $request->user()->categories()->findOrFail($id);
+        $category->update($fields);
+
+        return redirect()->route('categories.index')->with('success', 'Categoria atualizada com sucesso.');
+    }
+
+    public function destroy($id)
+    {
+        // delete category
     }
 }

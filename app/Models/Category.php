@@ -23,6 +23,8 @@ class Category extends Model
     }
 
     public function scopeFilter($query, array $filters) {
+        $query->where('active', true);
+
         if ($filters['search'] ?? false) {
             $query->where('name', 'like', '%' . $filters['search'] . '%');
         }
