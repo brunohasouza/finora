@@ -21,5 +21,5 @@ defineOptions({
 });
 
 const page = usePage<PageProps>();
-const userName = computed(() => page.props!.auth!.user!.name);
+const userName = computed(() => page.props!.auth!.user!.full_name);
 </script>

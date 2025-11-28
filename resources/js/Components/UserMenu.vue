@@ -7,11 +7,11 @@
         <UButton
             v-bind="{
                 ...user,
-                label: collapsed ? undefined : user?.name,
+                label: collapsed ? undefined : user?.first_name,
                 trailingIcon: collapsed ? undefined : 'i-lucide-chevrons-up-down',
             }"
             :avatar="{
-                text: user?.name[0] ?? '',
+                text: user?.first_name[0] ?? '',
             }"
             color="neutral"
             variant="ghost"

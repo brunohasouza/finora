@@ -35,7 +35,8 @@ defineOptions({
 });
 
 const schema = y.object({
-    name: y.string().required(),
+    first_name: y.string().required(),
+    last_name: y.string().required(),
     email: y.string().required().email(),
     password: y.string().required().min(8),
     password_confirmation: y
@@ -49,10 +50,17 @@ const authForm = useTemplateRef('authForm');
 
 const fields: AuthFormField[] = [
     {
-        name: 'name',
-        label: 'Nome Completo',
+        name: 'first_name',
+        label: 'Nome',
         type: 'text',
-        placeholder: 'João da Silva',
+        placeholder: 'ex: João',
+        required: true,
+    },
+    {
+        name: 'last_name',
+        label: 'Sobrenome',
+        type: 'text',
+        placeholder: 'ex: da Silva',
         required: true,
     },
     {
@@ -79,7 +87,8 @@ const fields: AuthFormField[] = [
 ];
 
 const form = useForm<Schema>({
-    name: '',
+    first_name: '',
+    last_name: '',
     email: '',
     password: '',
     password_confirmation: '',
