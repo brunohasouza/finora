@@ -60,6 +60,11 @@ class User extends Authenticatable implements CanResetPassword
         return $this->hasMany(Category::class);
     }
 
+    public function wallets()
+    {
+        return $this->hasMany(Wallet::class);
+    }
+
     public function getFullNameAttribute(): string
     {
         return "{$this->first_name} {$this->last_name}";
