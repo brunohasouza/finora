@@ -92,8 +92,11 @@ class WalletController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Wallet $wallet)
+    public function destroy($id)
     {
-        //
+        $wallet = Auth::user()->wallets()->findOrFail($id);
+        $wallet->delete();
+
+        return redirect()->route('accounts.index', request()->query())->with('success', 'Conta excluída com sucesso.');
     }
 }

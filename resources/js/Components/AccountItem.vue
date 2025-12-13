@@ -22,6 +22,7 @@ import { DropdownMenuItem } from '@nuxt/ui';
 import { useOverlay } from '@nuxt/ui/runtime/composables/useOverlay.js';
 import { ref } from 'vue';
 import AccountAddModal from './AccountAddModal.vue';
+import AccountDeleteModal from './AccountDeleteModal.vue';
 
 const props = defineProps<{
     account: Account;
@@ -29,6 +30,7 @@ const props = defineProps<{
 
 const overlay = useOverlay();
 const modalAdd = overlay.create(AccountAddModal);
+const modalDelete = overlay.create(AccountDeleteModal);
 
 const dropdownItems = ref<DropdownMenuItem[]>([
     {
@@ -47,6 +49,12 @@ const dropdownItems = ref<DropdownMenuItem[]>([
         label: 'Excluir conta',
         icon: 'i-lucide-trash',
         color: 'error',
+        onSelect: () => {
+            modalDelete.open({
+                accountId: props.account.id,
+                accountName: props.account.name,
+            });
+        },
     },
 ]);
 </script>

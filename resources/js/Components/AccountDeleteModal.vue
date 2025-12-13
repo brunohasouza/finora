@@ -1,13 +1,13 @@
 <template>
     <UModal
-        title="Excluir categoria"
-        :description="`Tem certeza que deseja excluir a categoria '${categoryName}'?`"
+        title="Excluir conta"
+        :description="`Tem certeza que deseja excluir a conta '${accountName}'?`"
         :close="{ onClick: () => emits('close', false) }"
         :ui="{ footer: 'justify-end', title: 'text-error-400' }"
     >
         <template #body>
             <p class="text-sm text-neutral-300">
-                Ao excluir a categoria <strong class="text-error-400">{{ categoryName }}</strong
+                Ao excluir a conta <strong class="text-error-400">{{ accountName }}</strong
                 >, todas as transações associadas a ela serão afetadas. Por favor, confirme sua decisão.
             </p>
             <UAlert v-if="errorMessage" :description="errorMessage" icon="i-lucide-x-circle" color="error" class="mt-5" />
@@ -27,8 +27,8 @@ import { ref } from 'vue';
 const emits = defineEmits<{ close: [boolean] }>();
 
 const props = defineProps<{
-    categoryId?: number | string;
-    categoryName?: string;
+    accountId?: number | string;
+    accountName?: string;
 }>();
 
 const toast = useToast();
@@ -37,7 +37,7 @@ const errorMessage = ref('');
 
 function confirmDelete() {
     const query = window.location.search;
-    router.delete(`/categories/${props.categoryId}${query}`, {
+    router.delete(`/accounts/${props.accountId}`, {
         preserveState: true,
         preserveScroll: true,
         replace: true,
@@ -45,15 +45,15 @@ function confirmDelete() {
             emits('close', false);
 
             toast.add({
-                title: 'Categoria excluída',
-                description: `A categoria '${props.categoryName}' foi excluída com sucesso.`,
+                title: 'Conta excluída',
+                description: `A conta '${props.accountName}' foi excluída com sucesso.`,
                 color: 'success',
                 icon: 'i-lucide-check-circle',
             });
         },
         onError: (errors) => {
             console.error(errors);
-            errorMessage.value = 'Ocorreu um erro ao excluir a categoria.';
+            errorMessage.value = 'Ocorreu um erro ao excluir a conta.';
         },
     });
 }
