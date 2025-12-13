@@ -64,4 +64,4 @@ export type Account = {
     updated_at: Date | string;
 };
 
-export type AccountResponse = PaginatedResponse<Account>;
+export type AccountResponse = Account[];

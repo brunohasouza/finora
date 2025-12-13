@@ -146,6 +146,9 @@ const columns: TableColumn<Category>[] = [
                                 },
                             },
                             {
+                                type: 'separator',
+                            },
+                            {
                                 label: 'Excluir categoria',
                                 icon: 'i-lucide-trash',
                                 color: 'error',

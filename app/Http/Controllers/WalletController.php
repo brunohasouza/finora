@@ -19,9 +19,11 @@ class WalletController extends Controller
         $user = Auth::user();
 
         $wallets = $user->wallets()->with('bank')->get();
+        $totalBalance = $wallets->sum('balance');
 
         return Inertia::render('Dashboard/WalletPage', [
             'accounts' => $wallets,
+            'totalBalance' => $totalBalance,
         ]);
     }
 
