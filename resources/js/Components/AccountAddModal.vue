@@ -1,8 +1,8 @@
 <template>
     <UModal
         :dismissable="state.processing"
-        title="Nova conta"
-        description="Adicione uma nova conta para gerenciar suas finanças."
+        :title="title"
+        :description="description"
         :close="{ onClick: () => emits('close', false) }"
         :ui="{ footer: 'justify-end' }"
     >
@@ -37,7 +37,7 @@
 </template>
 
 <script setup lang="ts">
-import { Bank } from '@/types';
+import { Account, Bank } from '@/types';
 import { useForm } from '@inertiajs/vue3';
 import { FormSubmitEvent } from '@nuxt/ui';
 import { useToast } from '@nuxt/ui/runtime/composables/useToast.js';
@@ -45,7 +45,13 @@ import { Mask } from 'maska';
 import { computed, onMounted, ref, useTemplateRef } from 'vue';
 import * as y from 'yup';
 
+const props = defineProps<{
+    account?: Account;
+}>();
+
 const MAX_BALANCE = 100000000000;
+const title = props.account ? 'Editar conta' : 'Nova conta';
+const description = props.account ? `Edite os detalhes da conta '${props.account.name}'.` : 'Adicione uma nova conta para suas transações.';
 const mask = new Mask({
     mask: '9.99#,##',
     reversed: true,
@@ -59,7 +65,7 @@ const mask = new Mask({
 
 const schema = y.object({
     name: y.string().required(),
-    bank_id: y.string().required(),
+    bank_id: y.number().required(),
     balance: y
         .number()
         .required()
@@ -74,9 +80,9 @@ const emits = defineEmits<{ close: [boolean] }>();
 const form = useTemplateRef('form');
 const toast = useToast();
 const state = useForm<Schema>({
-    name: '',
-    bank_id: '',
-    balance: 0,
+    name: props.account?.name ?? '',
+    bank_id: typeof props.account?.bank?.id === 'number' ? props.account.bank.id : 0,
+    balance: props.account?.balance ?? 0,
 });
 
 const loading = ref(false);
@@ -112,7 +118,11 @@ async function fetchBanks() {
 }
 
 function onSubmit(e: FormSubmitEvent<Schema>) {
-    state.submit('post', `/accounts`, {
+    const url = props.account ? `/accounts/${props.account.id}` : '/accounts';
+    const successDesc = props.account ? 'Conta atualizada com sucesso.' : 'Conta criada com sucesso.';
+    const method = props.account ? 'put' : 'post';
+
+    state.submit(method, url, {
         preserveState: true,
         preserveScroll: true,
         replace: true,
@@ -121,7 +131,7 @@ function onSubmit(e: FormSubmitEvent<Schema>) {
 
             toast.add({
                 title: 'Sucesso',
-                description: 'Conta adicionada com sucesso.',
+                description: successDesc,
                 color: 'success',
                 icon: 'i-lucide-check-circle',
             });

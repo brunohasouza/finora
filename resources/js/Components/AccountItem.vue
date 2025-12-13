@@ -19,16 +19,26 @@
 import { Account } from '@/types';
 import { formatCurrency } from '@/utils';
 import { DropdownMenuItem } from '@nuxt/ui';
+import { useOverlay } from '@nuxt/ui/runtime/composables/useOverlay.js';
 import { ref } from 'vue';
+import AccountAddModal from './AccountAddModal.vue';
 
-defineProps<{
+const props = defineProps<{
     account: Account;
 }>();
+
+const overlay = useOverlay();
+const modalAdd = overlay.create(AccountAddModal);
 
 const dropdownItems = ref<DropdownMenuItem[]>([
     {
         label: 'Editar conta',
         icon: 'i-lucide-pen',
+        onSelect: () => {
+            modalAdd.open({
+                account: props.account,
+            });
+        },
     },
     {
         type: 'separator',

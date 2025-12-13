@@ -75,9 +75,18 @@ class WalletController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateWalletRequest $request, Wallet $wallet)
+    public function update(UpdateWalletRequest $request, $id)
     {
-        //
+        $fields = $request->validate([
+            'name' => ['required','string', 'max:255'],
+            'bank_id' => ['required', 'integer', 'exists:banks,id'],
+            'balance' => ['required', 'integer', 'max_digits:12'],
+        ]);
+
+        $account = $request->user()->wallets()->findOrFail($id);
+        $account->update($fields);
+
+        return redirect()->route('accounts.index', request()->query())->with('success', 'Conta atualizada com sucesso.');
     }
 
     /**
