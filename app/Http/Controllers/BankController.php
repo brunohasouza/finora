@@ -13,7 +13,8 @@ class BankController extends Controller
      */
     public function index()
     {
-        //
+        $banks = Bank::all();
+        return response()->json($banks);
     }
 
     /**

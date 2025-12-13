@@ -15,4 +15,9 @@ class Bank extends Model
         'shortname',
         'name',
     ];
+
+    public function accounts()
+    {
+        return $this->hasMany(Wallet::class);
+    }
 }

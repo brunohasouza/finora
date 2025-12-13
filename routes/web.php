@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\BankController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ForgotPasswordController;
 use App\Http\Controllers\ResetPasswordController;
@@ -15,7 +16,8 @@ Route::middleware(['auth'])->group(function () {
 
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::resource('categories', CategoryController::class);
-    Route::resource('wallets', WalletController::class);
+    Route::resource('accounts', WalletController::class);
+    Route::resource('banks', BankController::class);
 });
 
 Route::middleware(['guest'])->group(function() {

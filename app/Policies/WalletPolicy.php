@@ -4,7 +4,7 @@ namespace App\Policies;
 
 use App\Models\User;
 use App\Models\Wallet;
-use Illuminate\Auth\Access\Response;
+use Illuminate\Support\Facades\Auth;
 
 class WalletPolicy
 {
@@ -29,7 +29,7 @@ class WalletPolicy
      */
     public function create(User $user): bool
     {
-        return false;
+        return $user->id === Auth::user()->id;
     }
 
     /**

@@ -8,6 +8,22 @@ export type User = {
     id: number;
 };
 
+export type PaginatedResponse<T> = {
+    current_page: number;
+    data: T[];
+    first_page_url: string;
+    from: number;
+    last_page: number;
+    last_page_url: string;
+    links: { active: boolean; label: string; url: string | null; page: number | null }[];
+    next_page_url: string | null;
+    path: string;
+    per_page: number;
+    prev_page_url: string | null;
+    to: number;
+    total: number;
+};
+
 export interface PageProps extends InertiaPageProps {
     auth: {
         user?: User;
@@ -23,23 +39,29 @@ export type Category = {
     updated_at: Date | string;
 };
 
-export type CategoryResponse = {
-    current_page: number;
-    data: Category[];
-    first_page_url: string;
-    from: number;
-    last_page: number;
-    last_page_url: string;
-    links: { active: boolean; label: string; url: string | null; page: number | null }[];
-    next_page_url: string | null;
-    path: string;
-    per_page: number;
-    prev_page_url: string | null;
-    to: number;
-    total: number;
-};
+export type CategoryResponse = PaginatedResponse<Category>;
 
 export enum CATEGORY_TYPE {
     INCOME = 'income',
     EXPENSE = 'expense',
 }
+
+export type Bank = {
+    id: number | string;
+    name: string;
+    created_at: Date | string;
+    updated_at: Date | string;
+    shortname: string;
+    code: string;
+};
+
+export type Account = {
+    id: number | string;
+    name: string;
+    bank: Bank;
+    balance: number;
+    created_at: Date | string;
+    updated_at: Date | string;
+};
+
+export type AccountResponse = PaginatedResponse<Account>;

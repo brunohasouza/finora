@@ -58,8 +58,6 @@ const props = defineProps<{
     typeFilter: CATEGORY_TYPE | null;
 }>();
 
-console.log(props.categories);
-
 const overlay = useOverlay();
 const modalAdd = overlay.create(CategoryAddModal);
 const modalDelete = overlay.create(CategoryDeleteModal); // Placeholder for CategoryDeleteModal

@@ -4,7 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreWalletRequest;
 use App\Http\Requests\UpdateWalletRequest;
+use App\Models\Bank;
 use App\Models\Wallet;
+use Illuminate\Support\Facades\Auth;
+use Inertia\Inertia;
 
 class WalletController extends Controller
 {
@@ -13,7 +16,13 @@ class WalletController extends Controller
      */
     public function index()
     {
-        //
+        $user = Auth::user();
+
+        $wallets = $user->wallets()->with('bank')->get();
+
+        return Inertia::render('Dashboard/WalletPage', [
+            'accounts' => $wallets,
+        ]);
     }
 
     /**
@@ -29,7 +38,20 @@ class WalletController extends Controller
      */
     public function store(StoreWalletRequest $request)
     {
-        //
+        $fields = $request->validate([
+            'name' => ['required','string', 'max:255'],
+            'bank_id' => ['required', 'integer', 'exists:banks,id'],
+            'balance' => ['required', 'integer', 'max_digits:12'],
+        ]);
+        
+        $bank = Bank::findOrFail($request->bank_id);
+        $request->user()->wallets()->create([
+            'name' => $fields['name'],
+            'bank_id' => $bank->id,
+            'balance' => $fields['balance'],
+        ]);
+
+        return redirect()->route('accounts.index', request()->query())->with('success', 'Conta adicionada com sucesso.');
     }
 
     /**

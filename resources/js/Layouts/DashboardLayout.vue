@@ -34,6 +34,11 @@ const items: NavigationMenuItem[] = [
         exact: true,
     },
     {
+        label: 'Contas',
+        icon: 'i-lucide-wallet',
+        to: '/accounts',
+    },
+    {
         label: 'Categorias',
         icon: 'i-lucide-tag',
         to: '/categories',
