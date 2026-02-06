@@ -27,6 +27,12 @@ class WalletController extends Controller
         ]);
     }
 
+    public function list()
+    {
+        $accounts = Auth::user()->wallets()->get();
+        return response()->json($accounts);
+    }
+
     /**
      * Show the form for creating a new resource.
      */

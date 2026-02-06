@@ -27,6 +27,12 @@ class CategoryController extends Controller
         ]);
     }
 
+    public function list()
+    {
+        $categories = Auth::user()->categories()->get();
+        return response()->json($categories);
+    }
+
     public function create()
     {
         // render creation page

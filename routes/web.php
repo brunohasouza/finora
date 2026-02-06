@@ -5,17 +5,18 @@ use App\Http\Controllers\BankController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ForgotPasswordController;
 use App\Http\Controllers\ResetPasswordController;
+use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\WalletController;
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
 
 Route::middleware(['auth'])->group(function () {
-    Route::get('/', function() {
-        return Inertia::render('HomePage');
-    })->name('home');
+    Route::get('/', [TransactionController::class, 'index'])->name('transactions.index');
+    Route::resource('transactions', TransactionController::class)->except(['index', 'create', 'show', 'edit']);
 
     Route::post('/logout', [AuthController::class, 'logout']);
+    Route::get('/categories/list', [CategoryController::class, 'list']);
     Route::resource('categories', CategoryController::class);
+    Route::get('/accounts/list', [WalletController::class, 'list']);
     Route::resource('accounts', WalletController::class);
     Route::resource('banks', BankController::class);
 });
