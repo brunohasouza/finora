@@ -45,4 +45,14 @@ class Transaction extends Model
     {
         return $this->belongsTo(Category::class);
     }
+
+    public function scopeFilter($query, array $filters) {
+        if ($filters['type'] ?? false) {
+            $query->where('type', $filters['type']);
+        }
+
+        if ($filters['category_id'] ?? false) {
+            $query->where('category_id', $filters['category_id']);
+        }
+    }
 }

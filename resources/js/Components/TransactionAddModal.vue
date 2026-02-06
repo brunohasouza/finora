@@ -37,7 +37,7 @@
                         :disabled="!state.type"
                     />
                 </UFormField>
-                <UFormField label="Conta" name="account_id" class="col-span-2">
+                <UFormField label="Conta" name="wallet_id" class="col-span-2">
                     <USelect v-model="localAccountId" :items="accountOptions" :ui="{ base: 'w-full' }" placeholder="Selecione a conta" />
                 </UFormField>
             </UForm>
@@ -85,7 +85,7 @@ const schema = y.object({
         .max(MAX_AMOUNT, `O valor máximo é de R$ ${mask.masked(MAX_AMOUNT)}`),
     type: y.string().required(),
     category_id: y.number().required().min(1, 'Este campo é obrigatório'),
-    account_id: y.number().required().min(1, 'Este campo é obrigatório'),
+    wallet_id: y.number().required().min(1, 'Este campo é obrigatório'),
     date: y.string().required(),
 });
 
@@ -100,7 +100,7 @@ const state = useForm<Schema>({
     amount: 0,
     type: '',
     category_id: 0,
-    account_id: 0,
+    wallet_id: 0,
     date: today(getLocalTimeZone()).toString(),
 });
 
@@ -138,9 +138,9 @@ const localCategoryId = computed({
 });
 
 const localAccountId = computed({
-    get: () => (state.account_id === 0 ? undefined : state.account_id),
+    get: () => (state.wallet_id === 0 ? undefined : state.wallet_id),
     set: (value: number | string | undefined) => {
-        state.account_id = typeof value === 'number' ? value : Number(value) || 0;
+        state.wallet_id = typeof value === 'number' ? value : Number(value) || 0;
     },
 });
 
@@ -180,12 +180,24 @@ async function fetchAccounts() {
 }
 
 function onSubmit(_: FormSubmitEvent<Schema>) {
-    // TODO: Implement transaction creation
-    toast.add({
-        title: 'Em desenvolvimento',
-        description: 'A criação de transações ainda não foi implementada.',
-        color: 'warning',
-        icon: 'i-lucide-alert-triangle',
+    state.submit('post', '/transactions', {
+        preserveState: true,
+        preserveScroll: true,
+        replace: true,
+        onSuccess: () => {
+            emits('close', false);
+
+            toast.add({
+                title: 'Sucesso',
+                description: 'Transação criada com sucesso.',
+                color: 'success',
+                icon: 'i-lucide-check-circle',
+            });
+        },
+        onError: (errors) => {
+            console.error(errors);
+            errorMessage.value = 'Ocorreu um erro ao salvar a transação.';
+        },
     });
 }
 

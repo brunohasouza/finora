@@ -15,12 +15,15 @@ class TransactionController extends Controller
         $user = Auth::user();
 
         $transactions = $user->transactions()
-            ->latest('date')
+            ->latest('created_at')
+            ->filter(request(['type', 'category_id']))
             ->paginate(10)
             ->withQueryString();
 
         return Inertia::render('HomePage', [
             'transactions' => $transactions,
+            'type' => $request->type,
+            'category_id' => $request->category_id,
         ]);
     }
 

@@ -65,3 +65,17 @@ export type Account = {
 };
 
 export type AccountResponse = Account[];
+
+export type Transaction = {
+    id: number | string;
+    description: string;
+    amount: number;
+    date: string;
+    type: CATEGORY_TYPE;
+    category: Category;
+    wallet: Account;
+    created_at: Date | string;
+    updated_at: Date | string;
+};
+
+export type TransactionResponse = PaginatedResponse<Transaction>;
