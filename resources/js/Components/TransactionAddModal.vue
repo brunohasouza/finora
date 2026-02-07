@@ -15,7 +15,18 @@
                     <UInput v-model="localAmount" placeholder="R$ 0,00" type="text" :ui="{ root: 'w-full' }" />
                 </UFormField>
                 <UFormField label="Data" name="date">
-                    <UInputDate v-model="transactionDate" :ui="{ root: 'w-full' }" @update:model-value="onDateChange" />
+                    <UPopover v-model:open="calendarOpen">
+                        <UInput
+                            :model-value="displayDate"
+                            placeholder="Selecione a data"
+                            readonly
+                            icon="i-lucide-calendar"
+                            :ui="{ root: 'w-full cursor-pointer' }"
+                        />
+                        <template #content>
+                            <UCalendar v-model="transactionDate" @update:model-value="onDateChange" />
+                        </template>
+                    </UPopover>
                 </UFormField>
                 <UFormField label="Tipo" name="type">
                     <USelect
@@ -97,7 +108,6 @@ function formatDate(dateString: string): CalendarDate {
 }
 
 const transactionDate = ref<CalendarDate>(isEditing ? formatDate(props.transaction!.date) : today(getLocalTimeZone()));
-console.log(props.transaction);
 
 const state = useForm<Schema>({
     description: props.transaction?.description ?? '',
@@ -112,6 +122,13 @@ const types = ref<SelectItem[]>([
     { label: 'Receita', value: CATEGORY_TYPE.INCOME },
     { label: 'Despesa', value: CATEGORY_TYPE.EXPENSE },
 ]);
+
+const calendarOpen = ref(false);
+
+const displayDate = computed(() => {
+    const { year, month, day } = transactionDate.value;
+    return new Date(year, month - 1, day).toLocaleDateString('pt-BR');
+});
 
 const loading = ref(false);
 const categoriesData = ref<Category[]>([]);
@@ -163,6 +180,7 @@ function onTypeChange() {
 
 function onDateChange(value: CalendarDate) {
     state.date = value.toString();
+    calendarOpen.value = false;
 }
 
 async function fetchCategories() {

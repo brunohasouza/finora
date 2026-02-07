@@ -44,6 +44,7 @@ import AccountItem from '@/Components/AccountItem.vue';
 import DashboardLayout from '@/Layouts/DashboardLayout.vue';
 import { AccountResponse } from '@/types';
 import { formatCurrency } from '@/utils';
+import { Head } from '@inertiajs/vue3';
 import { useOverlay } from '@nuxt/ui/runtime/composables/useOverlay.js';
 
 defineOptions({
