@@ -79,3 +79,9 @@ export type Transaction = {
 };
 
 export type TransactionResponse = PaginatedResponse<Transaction>;
+
+export type Balance = {
+    total: number;
+    expenses: number;
+    incomes: number;
+};

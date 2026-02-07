@@ -11,6 +11,32 @@
             </UDashboardNavbar>
         </template>
         <template #body>
+            <div class="flex flex-wrap items-center gap-4">
+                <UCard variant="subtle" class="flex-2">
+                    <div class="space-y-3">
+                        <p class="text-base font-normal opacity-70">Saldo Total</p>
+                        <p class="text-3xl font-bold">{{ formatCurrency(balance?.total ?? 0) }}</p>
+                    </div>
+                </UCard>
+                <UCard variant="outline" class="flex-1">
+                    <div class="space-y-3">
+                        <div class="flex items-center gap-2">
+                            <span class="inline-flex h-5 w-5 rounded bg-info"></span>
+                            <p class="text-base font-medium opacity-70">Receitas</p>
+                        </div>
+                        <p class="text-xl font-bold">{{ formatCurrency(balance?.incomes ?? 0) }}</p>
+                    </div>
+                </UCard>
+                <UCard variant="outline" class="flex-1">
+                    <div class="space-y-3">
+                        <div class="flex items-center gap-2">
+                            <span class="inline-flex h-5 w-5 rounded bg-error"></span>
+                            <p class="text-base font-medium opacity-70">Despesas</p>
+                        </div>
+                        <p class="text-xl font-bold">{{ formatCurrency(balance?.expenses ?? 0) }}</p>
+                    </div>
+                </UCard>
+            </div>
             <div class="flex items-center justify-end gap-4">
                 <USelect v-model="typeFilter" :items="types" :ui="{ base: 'w-48' }" @update:modelValue="search" />
                 <USelect v-model="categoryFilter" :items="categoryOptions" :ui="{ base: 'w-48' }" @update:modelValue="search" />
@@ -38,7 +64,7 @@
 <script lang="ts" setup>
 import TransactionAddModal from '@/Components/TransactionAddModal.vue';
 import DashboardLayout from '@/Layouts/DashboardLayout.vue';
-import { Category, CATEGORY_TYPE, PageProps, Transaction, TransactionResponse } from '@/types';
+import { Balance, Category, CATEGORY_TYPE, PageProps, Transaction, TransactionResponse } from '@/types';
 import { formatCurrency } from '@/utils';
 import { router, usePage } from '@inertiajs/vue3';
 import type { TableColumn } from '@nuxt/ui';
@@ -53,6 +79,7 @@ const props = defineProps<{
     transactions: TransactionResponse | null;
     type: CATEGORY_TYPE | null;
     category_id: string | null;
+    balance: Balance | null;
 }>();
 
 const overlay = useOverlay();
@@ -62,6 +89,8 @@ const page = usePage<PageProps>();
 const userName = computed(() => page.props!.auth!.user!.full_name);
 
 const UBadge = resolveComponent('UBadge');
+const UButton = resolveComponent('UButton');
+const UDropdownMenu = resolveComponent('UDropdownMenu');
 
 const currentPage = ref(props.transactions?.current_page || 1);
 const typeFilter = ref(props.type ?? 'all');
@@ -125,29 +154,16 @@ const columns: TableColumn<Transaction>[] = [
     {
         accessorKey: 'description',
         header: 'Descrição',
-        meta: {
-            class: {
-                td: 'w-[40%]',
-            },
-        },
         cell: ({ row }) => row.getValue('description'),
-    },
-    {
-        accessorKey: 'amount',
-        header: 'Valor',
-        cell: ({ row }) => {
-            const amount = row.getValue('amount') as number;
-            return formatCurrency(amount);
-        },
-    },
-    {
-        accessorKey: 'date',
-        header: 'Data',
-        cell: ({ row }) => formatDate(row.getValue('date')),
     },
     {
         accessorKey: 'type',
         header: 'Tipo',
+        meta: {
+            class: {
+                td: 'w-[6.25rem]',
+            },
+        },
         cell: ({ row }) => {
             const type = row.getValue('type');
             if (type === CATEGORY_TYPE.INCOME) {
@@ -160,9 +176,26 @@ const columns: TableColumn<Transaction>[] = [
         },
     },
     {
+        accessorKey: 'amount',
+        header: 'Valor',
+        meta: {
+            class: {
+                td: 'w-[15%]',
+            },
+        },
+        cell: ({ row }) => {
+            const amount = row.getValue('amount') as number;
+            return formatCurrency(amount);
+        },
+    },
+    {
         accessorKey: 'category',
         header: 'Categoria',
-        // cell: ({ row }) => row.original.category.name,
+        meta: {
+            class: {
+                td: 'w-[15%]',
+            },
+        },
         cell: ({ row }) => {
             return h(
                 'div',
@@ -178,6 +211,59 @@ const columns: TableColumn<Transaction>[] = [
                 ],
             );
         },
+    },
+    {
+        accessorKey: 'date',
+        header: 'Data',
+        meta: {
+            class: {
+                td: 'w-28',
+            },
+        },
+        cell: ({ row }) => formatDate(row.getValue('date')),
+    },
+    {
+        id: 'actions',
+        meta: {
+            class: {
+                td: 'w-16',
+            },
+        },
+        cell: ({ row }) =>
+            h(
+                'div',
+                { class: 'text-right' },
+                h(
+                    UDropdownMenu,
+                    {
+                        content: { align: 'end' },
+                        items: [
+                            {
+                                label: 'Editar transação',
+                                icon: 'i-lucide-pen',
+                                color: 'neutral',
+                                onSelect: () => {},
+                            },
+                            {
+                                type: 'separator',
+                            },
+                            {
+                                label: 'Excluir transação',
+                                icon: 'i-lucide-trash',
+                                color: 'error',
+                                onSelect: () => {},
+                            },
+                        ],
+                    },
+                    () =>
+                        h(UButton, {
+                            icon: 'i-lucide-ellipsis-vertical',
+                            color: 'neutral',
+                            variant: 'ghost',
+                            class: 'ml-auto',
+                        }),
+                ),
+            ),
     },
 ];
 </script>

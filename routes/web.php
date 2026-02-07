@@ -10,7 +10,7 @@ use App\Http\Controllers\WalletController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth'])->group(function () {
-    Route::get('/', [TransactionController::class, 'index'])->name('transactions.index');
+    Route::get('/', [TransactionController::class, 'index'])->name('home');
     Route::resource('transactions', TransactionController::class)->except(['index', 'create', 'show', 'edit']);
 
     Route::post('/logout', [AuthController::class, 'logout']);
