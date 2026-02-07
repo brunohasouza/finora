@@ -68,6 +68,7 @@ import DashboardLayout from '@/Layouts/DashboardLayout.vue';
 import { Balance, Category, CATEGORY_TYPE, PageProps, Transaction, TransactionResponse } from '@/types';
 import { formatCurrency } from '@/utils';
 import { router, usePage } from '@inertiajs/vue3';
+import { parseDate } from '@internationalized/date';
 import type { TableColumn } from '@nuxt/ui';
 import { useOverlay } from '@nuxt/ui/runtime/composables/useOverlay.js';
 import { computed, h, onMounted, ref, resolveComponent } from 'vue';
@@ -148,8 +149,8 @@ function to(pageNumber: number) {
 }
 
 function formatDate(dateString: string): string {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('pt-BR');
+    const { year, month, day } = parseDate(dateString);
+    return new Date(year, month - 1, day).toLocaleDateString('pt-BR');
 }
 
 const columns: TableColumn<Transaction>[] = [
@@ -244,7 +245,11 @@ const columns: TableColumn<Transaction>[] = [
                                 label: 'Editar transação',
                                 icon: 'i-lucide-pen',
                                 color: 'neutral',
-                                onSelect: () => {},
+                                onSelect: () => {
+                                    modalAdd.open({
+                                        transaction: row.original,
+                                    });
+                                },
                             },
                             {
                                 type: 'separator',

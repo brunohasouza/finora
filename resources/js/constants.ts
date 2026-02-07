@@ -1,3 +1,5 @@
+import { Mask } from 'maska';
+
 export const colors = [
     // red
     '#E53A36',
@@ -37,3 +39,14 @@ export const colors = [
     // grey
     '#546F79',
 ];
+
+export const currencyMask = new Mask({
+    mask: '9.99#,##',
+    reversed: true,
+    tokens: {
+        9: {
+            pattern: /[0-9]/,
+            repeated: true,
+        },
+    },
+});

@@ -1,8 +1,8 @@
 <template>
     <UModal
         :dismissable="state.processing"
-        title="Nova transação"
-        description="Adicione uma nova transação."
+        :title="title"
+        :description="description"
         :close="{ onClick: () => emits('close', false) }"
         :ui="{ footer: 'justify-end' }"
     >
@@ -53,28 +53,21 @@
 </template>
 
 <script setup lang="ts">
-import { Account, Category, CATEGORY_TYPE } from '@/types';
+import { currencyMask } from '@/constants';
+import { Account, Category, CATEGORY_TYPE, Transaction } from '@/types';
 import { useForm } from '@inertiajs/vue3';
-import { CalendarDate, getLocalTimeZone, today } from '@internationalized/date';
+import { CalendarDate, getLocalTimeZone, parseDate, today } from '@internationalized/date';
 import { FormSubmitEvent, SelectItem } from '@nuxt/ui';
 import { useToast } from '@nuxt/ui/runtime/composables/useToast.js';
-import { Mask } from 'maska';
 import { computed, onMounted, ref, useTemplateRef } from 'vue';
 import * as y from 'yup';
 
 const emits = defineEmits<{ close: [boolean] }>();
+const props = defineProps<{
+    transaction?: Transaction;
+}>();
 
 const MAX_AMOUNT = 100000000000;
-const mask = new Mask({
-    mask: '9.99#,##',
-    reversed: true,
-    tokens: {
-        9: {
-            pattern: /[0-9]/,
-            repeated: true,
-        },
-    },
-});
 
 const schema = y.object({
     description: y.string().required(),
@@ -82,7 +75,7 @@ const schema = y.object({
         .number()
         .required()
         .min(1, 'O valor deve ser maior que zero')
-        .max(MAX_AMOUNT, `O valor máximo é de R$ ${mask.masked(MAX_AMOUNT)}`),
+        .max(MAX_AMOUNT, `O valor máximo é de R$ ${currencyMask.masked(MAX_AMOUNT)}`),
     type: y.string().required(),
     category_id: y.number().required().min(1, 'Este campo é obrigatório'),
     wallet_id: y.number().required().min(1, 'Este campo é obrigatório'),
@@ -93,15 +86,26 @@ type Schema = y.InferType<typeof schema>;
 
 const form = useTemplateRef('form');
 const toast = useToast();
-const transactionDate = ref<CalendarDate>(today(getLocalTimeZone()));
+
+const isEditing = !!props.transaction;
+const title = isEditing ? 'Editar transação' : 'Nova transação';
+const description = isEditing ? `Edite os detalhes da transação '${props.transaction!.description}'.` : 'Adicione uma nova transação.';
+
+function formatDate(dateString: string): CalendarDate {
+    const { year, month, day } = parseDate(dateString);
+    return new CalendarDate(year, month, day);
+}
+
+const transactionDate = ref<CalendarDate>(isEditing ? formatDate(props.transaction!.date) : today(getLocalTimeZone()));
+console.log(props.transaction);
 
 const state = useForm<Schema>({
-    description: '',
-    amount: 0,
-    type: '',
-    category_id: 0,
-    wallet_id: 0,
-    date: today(getLocalTimeZone()).toString(),
+    description: props.transaction?.description ?? '',
+    amount: props.transaction?.amount ?? 0,
+    type: props.transaction?.type ?? '',
+    category_id: Number(props.transaction?.category?.id) || 0,
+    wallet_id: Number(props.transaction?.wallet?.id) || 0,
+    date: isEditing ? formatDate(props.transaction!.date).toString() : today(getLocalTimeZone()).toString(),
 });
 
 const types = ref<SelectItem[]>([
@@ -146,10 +150,10 @@ const localAccountId = computed({
 
 const localAmount = computed({
     get: () => {
-        return `R$ ${mask.masked(state.amount)}`;
+        return `R$ ${currencyMask.masked(state.amount)}`;
     },
     set: (value: string) => {
-        state.amount = Number(mask.unmasked(value)) || 0;
+        state.amount = Number(currencyMask.unmasked(value)) || 0;
     },
 });
 
@@ -180,7 +184,12 @@ async function fetchAccounts() {
 }
 
 function onSubmit(_: FormSubmitEvent<Schema>) {
-    state.submit('post', '/transactions', {
+    const query = window.location.search;
+    const url = isEditing ? `/transactions/${props.transaction!.id}` : '/transactions';
+    const method = isEditing ? 'put' : 'post';
+    const successDesc = isEditing ? 'Transação atualizada com sucesso.' : 'Transação criada com sucesso.';
+
+    state.submit(method, `${url}${query}`, {
         preserveState: true,
         preserveScroll: true,
         replace: true,
@@ -189,7 +198,7 @@ function onSubmit(_: FormSubmitEvent<Schema>) {
 
             toast.add({
                 title: 'Sucesso',
-                description: 'Transação criada com sucesso.',
+                description: successDesc,
                 color: 'success',
                 icon: 'i-lucide-check-circle',
             });

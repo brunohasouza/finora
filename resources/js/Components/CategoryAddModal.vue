@@ -55,8 +55,9 @@ const props = defineProps<{
 const form = useTemplateRef('form');
 const toast = useToast();
 
-const title = props.category ? 'Editar categoria' : 'Nova categoria';
-const description = props.category ? `Edite os detalhes da categoria '${props.category.name}'.` : 'Adicione uma nova categoria para suas transações.';
+const isEditing = !!props.category;
+const title = isEditing ? 'Editar categoria' : 'Nova categoria';
+const description = isEditing ? `Edite os detalhes da categoria '${props.category.name}'.` : 'Adicione uma nova categoria para suas transações.';
 
 const schema = y.object({
     name: y.string().required(),
@@ -81,9 +82,9 @@ const errorMessage = ref('');
 
 function onSubmit(_: FormSubmitEvent<Schema>) {
     const query = window.location.search;
-    const url = props.category ? `/categories/${props.category.id}` : '/categories';
-    const successDesc = props.category ? 'Categoria atualizada com sucesso.' : 'Categoria criada com sucesso.';
-    const method = props.category ? 'put' : 'post';
+    const url = isEditing ? `/categories/${props.category.id}` : '/categories';
+    const successDesc = isEditing ? 'Categoria atualizada com sucesso.' : 'Categoria criada com sucesso.';
+    const method = isEditing ? 'put' : 'post';
 
     state.submit(method, `${url}${query}`, {
         preserveState: true,

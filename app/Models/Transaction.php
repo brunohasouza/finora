@@ -24,13 +24,21 @@ class Transaction extends Model
         'user_id',
     ];
 
+    protected $hidden = [
+        'user_id',
+        'category_id',
+        'wallet_id',
+        'created_at',
+        'updated_at',
+        'deleted_at',
+    ];
+
     protected $with = ['wallet', 'category'];
 
     protected function casts(): array
     {
         return [
-            'date' => 'date',
-            'amount' => 'decimal:2',
+            'date' => 'datetime:Y-m-d',
         ];
     }
 
