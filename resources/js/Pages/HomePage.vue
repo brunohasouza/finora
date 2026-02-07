@@ -63,6 +63,7 @@
 
 <script lang="ts" setup>
 import TransactionAddModal from '@/Components/TransactionAddModal.vue';
+import TransactionDeleteModal from '@/Components/TransactionDeleteModal.vue';
 import DashboardLayout from '@/Layouts/DashboardLayout.vue';
 import { Balance, Category, CATEGORY_TYPE, PageProps, Transaction, TransactionResponse } from '@/types';
 import { formatCurrency } from '@/utils';
@@ -84,6 +85,7 @@ const props = defineProps<{
 
 const overlay = useOverlay();
 const modalAdd = overlay.create(TransactionAddModal);
+const modalDelete = overlay.create(TransactionDeleteModal);
 
 const page = usePage<PageProps>();
 const userName = computed(() => page.props!.auth!.user!.full_name);
@@ -251,7 +253,12 @@ const columns: TableColumn<Transaction>[] = [
                                 label: 'Excluir transação',
                                 icon: 'i-lucide-trash',
                                 color: 'error',
-                                onSelect: () => {},
+                                onSelect: () => {
+                                    modalDelete.open({
+                                        transactionId: row.original.id,
+                                        transactionDescription: row.original.description,
+                                    });
+                                },
                             },
                         ],
                     },

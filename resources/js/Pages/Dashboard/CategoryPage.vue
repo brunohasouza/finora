@@ -60,7 +60,7 @@ const props = defineProps<{
 
 const overlay = useOverlay();
 const modalAdd = overlay.create(CategoryAddModal);
-const modalDelete = overlay.create(CategoryDeleteModal); // Placeholder for CategoryDeleteModal
+const modalDelete = overlay.create(CategoryDeleteModal);
 const UBadge = resolveComponent('UBadge');
 const UDropdownMenu = resolveComponent('UDropdownMenu');
 const UButton = resolveComponent('UButton');
