@@ -22,12 +22,14 @@ class Transaction extends Model
         'category_id',
         'wallet_id',
         'user_id',
+        'invoice_id',
     ];
 
     protected $hidden = [
         'user_id',
         'category_id',
         'wallet_id',
+        'invoice_id',
         'created_at',
         'updated_at',
         'deleted_at',
@@ -55,6 +57,11 @@ class Transaction extends Model
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
+    }
+
+    public function invoice(): BelongsTo
+    {
+        return $this->belongsTo(Invoice::class);
     }
 
     public function scopeFilter($query, array $filters) {
