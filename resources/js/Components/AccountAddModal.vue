@@ -11,6 +11,15 @@
                 <UFormField label="Nome" name="name">
                     <UInput v-model="state.name" placeholder="Ex: Conta principal" type="text" :ui="{ root: 'w-full' }" />
                 </UFormField>
+                <UFormField label="Tipo" name="type">
+                    <USelect
+                        v-model="state.type"
+                        :items="walletTypes"
+                        :ui="{ base: 'w-full' }"
+                        placeholder="Selecione o tipo"
+                        :disabled="isEditing"
+                    />
+                </UFormField>
                 <UFormField label="Banco" name="bank">
                     <USelectMenu
                         v-model="state.bank_id"
@@ -21,9 +30,22 @@
                         class="w-full"
                     />
                 </UFormField>
-                <UFormField label="Saldo inicial" name="balance">
-                    <UInput v-model="localBalance" placeholder="10.0000,00" type="text" :ui="{ root: 'w-full' }" />
+                <UFormField v-if="state.type === WALLET_TYPE.CHECKING" label="Saldo inicial" name="balance">
+                    <UInput v-model="localBalance" placeholder="R$ 0,00" type="text" :ui="{ root: 'w-full' }" />
                 </UFormField>
+                <template v-if="state.type === WALLET_TYPE.CREDIT_CARD">
+                    <UFormField label="Limite" name="credit_limit">
+                        <UInput v-model="localCreditLimit" placeholder="R$ 0,00" type="text" :ui="{ root: 'w-full' }" />
+                    </UFormField>
+                    <div class="grid grid-cols-2 gap-4">
+                        <UFormField label="Dia de fechamento" name="closing_day">
+                            <UInput v-model.number="state.closing_day" placeholder="Ex: 25" type="number" min="1" max="31" :ui="{ root: 'w-full' }" />
+                        </UFormField>
+                        <UFormField label="Dia de vencimento" name="due_day">
+                            <UInput v-model.number="state.due_day" placeholder="Ex: 5" type="number" min="1" max="31" :ui="{ root: 'w-full' }" />
+                        </UFormField>
+                    </div>
+                </template>
             </UForm>
             <UAlert v-if="errorMessage" :description="errorMessage" icon="i-lucide-x-circle" color="error" class="mt-5" />
         </template>
@@ -37,7 +59,7 @@
 </template>
 
 <script setup lang="ts">
-import { Account, Bank } from '@/types';
+import { Account, Bank, WALLET_TYPE } from '@/types';
 import { useForm } from '@inertiajs/vue3';
 import { FormSubmitEvent } from '@nuxt/ui';
 import { useToast } from '@nuxt/ui/runtime/composables/useToast.js';
@@ -50,8 +72,9 @@ const props = defineProps<{
 }>();
 
 const MAX_BALANCE = 100000000000;
-const title = props.account ? 'Editar conta' : 'Nova conta';
-const description = props.account ? `Edite os detalhes da conta '${props.account.name}'.` : 'Adicione uma nova conta para suas transações.';
+const isEditing = !!props.account;
+const title = isEditing ? 'Editar conta' : 'Nova conta';
+const description = isEditing ? `Edite os detalhes da conta '${props.account!.name}'.` : 'Adicione uma nova conta para suas transações.';
 const mask = new Mask({
     mask: '9.99#,##',
     reversed: true,
@@ -63,14 +86,23 @@ const mask = new Mask({
     },
 });
 
+const walletTypes = [
+    { label: 'Conta corrente', value: WALLET_TYPE.CHECKING },
+    { label: 'Cartão de crédito', value: WALLET_TYPE.CREDIT_CARD },
+];
+
 const schema = y.object({
     name: y.string().required(),
+    type: y.string().required(),
     bank_id: y.number().required(),
     balance: y
         .number()
-        .required()
         .min(0, 'O saldo não pode ser negativo')
-        .max(MAX_BALANCE, `O saldo máximo é de R$ ${mask.masked(MAX_BALANCE)}`),
+        .max(MAX_BALANCE, `O saldo máximo é de R$ ${mask.masked(MAX_BALANCE)}`)
+        .default(0),
+    credit_limit: y.number().min(0, 'O limite não pode ser negativo').default(0),
+    closing_day: y.number().min(1, 'Mínimo 1').max(31, 'Máximo 31').default(0),
+    due_day: y.number().min(1, 'Mínimo 1').max(31, 'Máximo 31').default(0),
 });
 
 type Schema = y.InferType<typeof schema>;
@@ -81,8 +113,12 @@ const form = useTemplateRef('form');
 const toast = useToast();
 const state = useForm<Schema>({
     name: props.account?.name ?? '',
+    type: props.account?.type ?? WALLET_TYPE.CHECKING,
     bank_id: typeof props.account?.bank?.id === 'number' ? props.account.bank.id : 0,
     balance: props.account?.balance ?? 0,
+    credit_limit: props.account?.credit_limit ?? 0,
+    closing_day: props.account?.closing_day ?? 0,
+    due_day: props.account?.due_day ?? 0,
 });
 
 const loading = ref(false);
@@ -104,6 +140,15 @@ const localBalance = computed({
     },
 });
 
+const localCreditLimit = computed({
+    get: () => {
+        return `R$ ${mask.masked(state.credit_limit)}`;
+    },
+    set: (value: string) => {
+        state.credit_limit = Number(mask.unmasked(value)) || 0;
+    },
+});
+
 async function fetchBanks() {
     loading.value = true;
 
@@ -118,9 +163,9 @@ async function fetchBanks() {
 }
 
 function onSubmit(e: FormSubmitEvent<Schema>) {
-    const url = props.account ? `/accounts/${props.account.id}` : '/accounts';
-    const successDesc = props.account ? 'Conta atualizada com sucesso.' : 'Conta criada com sucesso.';
-    const method = props.account ? 'put' : 'post';
+    const url = isEditing ? `/accounts/${props.account!.id}` : '/accounts';
+    const successDesc = isEditing ? 'Conta atualizada com sucesso.' : 'Conta criada com sucesso.';
+    const method = isEditing ? 'put' : 'post';
 
     state.submit(method, url, {
         preserveState: true,
@@ -138,7 +183,7 @@ function onSubmit(e: FormSubmitEvent<Schema>) {
         },
         onError: (errors) => {
             console.error(errors);
-            errorMessage.value = 'Ocorreu um erro ao adicionar nova conta.';
+            errorMessage.value = 'Ocorreu um erro ao salvar a conta.';
         },
     });
 }

@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\WalletTypes;
 use App\Http\Requests\StoreWalletRequest;
 use App\Http\Requests\UpdateWalletRequest;
-use App\Models\Bank;
 use App\Models\Wallet;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rules\Enum;
 use Inertia\Inertia;
 
 class WalletController extends Controller
@@ -20,10 +21,14 @@ class WalletController extends Controller
 
         $wallets = $user->wallets()->with('bank')->get();
         $totalBalance = $wallets->sum('balance');
+        $totalCreditLimit = $wallets->sum('credit_limit');
+        $totalAvailableLimit = $wallets->sum('available_limit');
 
         return Inertia::render('Dashboard/WalletPage', [
             'accounts' => $wallets,
             'totalBalance' => $totalBalance,
+            'totalCreditLimit' => $totalCreditLimit,
+            'totalAvailableLimit' => $totalAvailableLimit,
         ]);
     }
 
@@ -47,17 +52,16 @@ class WalletController extends Controller
     public function store(StoreWalletRequest $request)
     {
         $fields = $request->validate([
-            'name' => ['required','string', 'max:255'],
+            'name' => ['required', 'string', 'max:255'],
+            'type' => ['required', new Enum(WalletTypes::class)],
             'bank_id' => ['required', 'integer', 'exists:banks,id'],
-            'balance' => ['required', 'integer', 'max_digits:12'],
+            'balance' => ['nullable', 'integer', 'max_digits:12'],
+            'credit_limit' => ['nullable', 'integer', 'max_digits:12'],
+            'closing_day' => ['nullable', 'integer', 'min:1', 'max:31'],
+            'due_day' => ['nullable', 'integer', 'min:1', 'max:31'],
         ]);
-        
-        $bank = Bank::findOrFail($request->bank_id);
-        $request->user()->wallets()->create([
-            'name' => $fields['name'],
-            'bank_id' => $bank->id,
-            'balance' => $fields['balance'],
-        ]);
+
+        $request->user()->wallets()->create($fields);
 
         return redirect()->route('accounts.index', request()->query())->with('success', 'Conta adicionada com sucesso.');
     }
@@ -84,9 +88,13 @@ class WalletController extends Controller
     public function update(UpdateWalletRequest $request, $id)
     {
         $fields = $request->validate([
-            'name' => ['required','string', 'max:255'],
+            'name' => ['required', 'string', 'max:255'],
+            'type' => ['required', new Enum(WalletTypes::class)],
             'bank_id' => ['required', 'integer', 'exists:banks,id'],
-            'balance' => ['required', 'integer', 'max_digits:12'],
+            'balance' => ['nullable', 'integer', 'max_digits:12'],
+            'credit_limit' => ['nullable', 'integer', 'max_digits:12'],
+            'closing_day' => ['nullable', 'integer', 'min:1', 'max:31'],
+            'due_day' => ['nullable', 'integer', 'min:1', 'max:31'],
         ]);
 
         $account = $request->user()->wallets()->findOrFail($id);

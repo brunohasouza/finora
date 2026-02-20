@@ -55,13 +55,23 @@ export type Bank = {
     code: string;
 };
 
+export enum WALLET_TYPE {
+    CHECKING = 'checking',
+    CREDIT_CARD = 'credit_card',
+}
+
 export type Account = {
     id: number | string;
     name: string;
     bank: Bank;
     balance: number;
+    type: WALLET_TYPE;
+    credit_limit: number | null;
+    closing_day: number | null;
+    due_day: number | null;
     created_at: Date | string;
     updated_at: Date | string;
+    available_limit: number;
 };
 
 export type AccountResponse = Account[];

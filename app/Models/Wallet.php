@@ -25,6 +25,8 @@ class Wallet extends Model
         'due_day',
     ];
 
+    protected $appends = ['available_limit'];
+
     public function bank(): BelongsTo
     {
         return $this->belongsTo(Bank::class);
@@ -48,5 +50,18 @@ class Wallet extends Model
     public function isCreditCard(): bool
     {
         return $this->type === WalletTypes::CREDIT_CARD->value;
+    }
+
+    public function getAvailableLimitAttribute(): int
+    {
+        if (!$this->isCreditCard()) {
+            return 0;
+        }
+
+        $openInvoicesTotal = $this->invoices()
+            ->whereIn('status', ['open', 'closed'])
+            ->sum('total');
+
+        return $this->credit_limit - $openInvoicesTotal;
     }
 }

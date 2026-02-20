@@ -48,7 +48,7 @@
                         :disabled="!state.type"
                     />
                 </UFormField>
-                <UFormField label="Conta" name="wallet_id" class="col-span-2">
+                <UFormField v-if="!isEditing" label="Conta" name="wallet_id" class="col-span-2">
                     <USelect v-model="localAccountId" :items="accountOptions" :ui="{ base: 'w-full' }" placeholder="Selecione a conta" />
                 </UFormField>
             </UForm>
@@ -65,7 +65,7 @@
 
 <script setup lang="ts">
 import { currencyMask } from '@/constants';
-import { Account, Category, CATEGORY_TYPE, Transaction } from '@/types';
+import { Account, Category, CATEGORY_TYPE, Transaction, WALLET_TYPE } from '@/types';
 import { useForm } from '@inertiajs/vue3';
 import { CalendarDate, getLocalTimeZone, parseDate, today } from '@internationalized/date';
 import { FormSubmitEvent, SelectItem } from '@nuxt/ui';
@@ -79,6 +79,7 @@ const props = defineProps<{
 }>();
 
 const MAX_AMOUNT = 100000000000;
+const isEditing = !!props.transaction;
 
 const schema = y.object({
     description: y.string().required(),
@@ -89,7 +90,7 @@ const schema = y.object({
         .max(MAX_AMOUNT, `O valor máximo é de R$ ${currencyMask.masked(MAX_AMOUNT)}`),
     type: y.string().required(),
     category_id: y.number().required().min(1, 'Este campo é obrigatório'),
-    wallet_id: y.number().required().min(1, 'Este campo é obrigatório'),
+    wallet_id: isEditing ? y.number().required().min(1, 'Este campo é obrigatório') : y.number(),
     date: y.string().required(),
 });
 
@@ -98,7 +99,6 @@ type Schema = y.InferType<typeof schema>;
 const form = useTemplateRef('form');
 const toast = useToast();
 
-const isEditing = !!props.transaction;
 const title = isEditing ? 'Editar transação' : 'Nova transação';
 const description = isEditing ? `Edite os detalhes da transação '${props.transaction!.description}'.` : 'Adicione uma nova transação.';
 
@@ -146,7 +146,7 @@ const filteredCategories = computed(() =>
 
 const accountOptions = computed(() =>
     accountsData.value.map((account) => ({
-        label: account.name,
+        label: `${account.name} - ${account.type === WALLET_TYPE.CREDIT_CARD ? 'Cartão de crédito' : 'Conta bancária'}`,
         value: account.id,
     })),
 );

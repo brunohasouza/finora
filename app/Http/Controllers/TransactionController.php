@@ -67,7 +67,6 @@ class TransactionController extends Controller
             'date' => ['required', 'date'],
             'type' => ['required', new Enum(CategoryTypes::class)],
             'category_id' => ['required', 'integer', 'exists:categories,id'],
-            'wallet_id' => ['required', 'integer', 'exists:wallets,id'],
         ]);
 
         $transaction = $request->user()->transactions()->findOrFail($id);
