@@ -84,6 +84,7 @@ export type Transaction = {
     type: CATEGORY_TYPE;
     category: Category;
     wallet: Account;
+    invoice?: Invoice;
     created_at: Date | string;
     updated_at: Date | string;
 };

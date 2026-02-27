@@ -11,8 +11,8 @@
                 <UFormField label="Descrição" name="description" class="col-span-2">
                     <UInput v-model="state.description" placeholder="Ex: Compras do mês" type="text" :ui="{ root: 'w-full' }" />
                 </UFormField>
-                <UFormField v-if="!isEditing" label="Conta" name="wallet_id" class="col-span-2">
-                    <USelect v-model="localAccountId" :items="accountOptions" :ui="{ base: 'w-full' }" placeholder="Selecione a conta" />
+                <UFormField v-if="!isEditing" label="Cartão de crédito" name="wallet_id" class="col-span-2">
+                    <USelect v-model="localAccountId" :items="accountOptions" :ui="{ base: 'w-full' }" placeholder="Selecione o cartão" />
                 </UFormField>
                 <UFormField label="Valor" name="amount">
                     <UInput v-model="localAmount" placeholder="R$ 0,00" type="text" :ui="{ root: 'w-full' }" />
@@ -30,15 +30,6 @@
                             <UCalendar v-model="transactionDate" @update:model-value="onDateChange" />
                         </template>
                     </UPopover>
-                </UFormField>
-                <UFormField label="Tipo" name="type">
-                    <USelect
-                        v-model="state.type"
-                        :items="types"
-                        :ui="{ base: 'w-full' }"
-                        placeholder="Selecione o tipo"
-                        @update:model-value="onTypeChange"
-                    />
                 </UFormField>
                 <UFormField label="Categoria" name="category_id">
                     <USelectMenu
@@ -68,7 +59,7 @@ import { currencyMask } from '@/constants';
 import { Account, Category, CATEGORY_TYPE, Transaction, WALLET_TYPE } from '@/types';
 import { useForm } from '@inertiajs/vue3';
 import { CalendarDate, getLocalTimeZone, parseDate, today } from '@internationalized/date';
-import { FormSubmitEvent, SelectItem } from '@nuxt/ui';
+import { FormSubmitEvent } from '@nuxt/ui';
 import { useToast } from '@nuxt/ui/runtime/composables/useToast.js';
 import { computed, onMounted, ref, useTemplateRef } from 'vue';
 import * as y from 'yup';
@@ -112,16 +103,11 @@ const transactionDate = ref<CalendarDate>(isEditing ? formatDate(props.transacti
 const state = useForm<Schema>({
     description: props.transaction?.description ?? '',
     amount: props.transaction?.amount ?? 0,
-    type: props.transaction?.type ?? '',
+    type: props.transaction?.type ?? CATEGORY_TYPE.EXPENSE,
     category_id: Number(props.transaction?.category?.id) || 0,
     wallet_id: Number(props.transaction?.wallet?.id) || 0,
     date: isEditing ? formatDate(props.transaction!.date).toString() : today(getLocalTimeZone()).toString(),
 });
-
-const types = ref<SelectItem[]>([
-    { label: 'Receita', value: CATEGORY_TYPE.INCOME },
-    { label: 'Despesa', value: CATEGORY_TYPE.EXPENSE },
-]);
 
 const calendarOpen = ref(false);
 
@@ -146,7 +132,7 @@ const filteredCategories = computed(() =>
 
 const accountOptions = computed(() =>
     accountsData.value
-        .filter((account) => account.type === WALLET_TYPE.CHECKING)
+        .filter((account) => account.type === WALLET_TYPE.CREDIT_CARD)
         .map((account) => ({
             label: account.name,
             value: account.id,
@@ -175,10 +161,6 @@ const localAmount = computed({
         state.amount = Number(currencyMask.unmasked(value)) || 0;
     },
 });
-
-function onTypeChange() {
-    state.category_id = 0;
-}
 
 function onDateChange(value: CalendarDate) {
     state.date = value.toString();

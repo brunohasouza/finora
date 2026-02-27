@@ -6,7 +6,9 @@
                     <UDashboardSidebarCollapse />
                 </template>
                 <template #right>
-                    <UButton color="primary" size="sm" icon="i-lucide-plus" @click="modalAdd.open()">Nova transação</UButton>
+                    <UDropdownMenu :items="dropdownItems">
+                        <UButton color="primary" size="sm" icon="i-lucide-plus">Nova transação</UButton>
+                    </UDropdownMenu>
                 </template>
             </UDashboardNavbar>
         </template>
@@ -63,13 +65,14 @@
 
 <script lang="ts" setup>
 import TransactionAddModal from '@/Components/TransactionAddModal.vue';
+import TransactionCreditCardModal from '@/Components/TransactionCreditCardModal.vue';
 import TransactionDeleteModal from '@/Components/TransactionDeleteModal.vue';
 import DashboardLayout from '@/Layouts/DashboardLayout.vue';
-import { Balance, Category, CATEGORY_TYPE, PageProps, Transaction, TransactionResponse } from '@/types';
+import { Balance, Category, CATEGORY_TYPE, INVOICE_STATUS, PageProps, Transaction, TransactionResponse, WALLET_TYPE } from '@/types';
 import { formatCurrency } from '@/utils';
 import { router, usePage } from '@inertiajs/vue3';
 import { parseDate } from '@internationalized/date';
-import type { TableColumn } from '@nuxt/ui';
+import type { DropdownMenuItem, TableColumn } from '@nuxt/ui';
 import { useOverlay } from '@nuxt/ui/runtime/composables/useOverlay.js';
 import { computed, h, onMounted, ref, resolveComponent } from 'vue';
 
@@ -84,9 +87,12 @@ const props = defineProps<{
     balance: Balance | null;
 }>();
 
+console.log(props.transactions);
+
 const overlay = useOverlay();
 const modalAdd = overlay.create(TransactionAddModal);
 const modalDelete = overlay.create(TransactionDeleteModal);
+const modalAddCreditCard = overlay.create(TransactionCreditCardModal);
 
 const page = usePage<PageProps>();
 const userName = computed(() => page.props!.auth!.user!.full_name);
@@ -94,6 +100,7 @@ const userName = computed(() => page.props!.auth!.user!.full_name);
 const UBadge = resolveComponent('UBadge');
 const UButton = resolveComponent('UButton');
 const UDropdownMenu = resolveComponent('UDropdownMenu');
+const UAvatar = resolveComponent('UAvatar');
 
 const currentPage = ref(props.transactions?.current_page || 1);
 const typeFilter = ref(props.type ?? 'all');
@@ -153,11 +160,35 @@ function formatDate(dateString: string): string {
     return new Date(year, month - 1, day).toLocaleDateString('pt-BR');
 }
 
+const dropdownItems: DropdownMenuItem[] = [
+    {
+        label: 'Conta corrente',
+        icon: 'i-lucide-landmark',
+        onSelect: () => modalAdd.open(),
+    },
+    {
+        label: 'Cartão de crédito',
+        icon: 'i-lucide-credit-card',
+        onSelect: () => modalAddCreditCard.open(),
+    },
+];
+
 const columns: TableColumn<Transaction>[] = [
     {
         accessorKey: 'description',
         header: 'Descrição',
-        cell: ({ row }) => row.getValue('description'),
+        cell: ({ row }) => {
+            return h(
+                'div',
+                {
+                    class: 'flex items-center gap-2',
+                },
+                [
+                    h(UAvatar, { class: 'flex-none', size: 'md', icon: !!row.original.invoice ? 'i-lucide-credit-card' : 'i-lucide-landmark' }),
+                    h('p', { class: 'flex-1' }, row.getValue('description')),
+                ],
+            );
+        },
     },
     {
         accessorKey: 'type',
@@ -245,10 +276,15 @@ const columns: TableColumn<Transaction>[] = [
                                 label: 'Editar transação',
                                 icon: 'i-lucide-pen',
                                 color: 'neutral',
+                                disabled:
+                                    row.original.category.name === 'Pagamento de Fatura' || row.original.invoice?.status === INVOICE_STATUS.PAID,
                                 onSelect: () => {
-                                    modalAdd.open({
-                                        transaction: row.original,
-                                    });
+                                    const modals = {
+                                        [WALLET_TYPE.CHECKING]: () => modalAdd.open({ transaction: row.original }),
+                                        [WALLET_TYPE.CREDIT_CARD]: () => modalAddCreditCard.open({ transaction: row.original }),
+                                    };
+
+                                    modals[row.original.wallet.type]?.();
                                 },
                             },
                             {
@@ -258,6 +294,8 @@ const columns: TableColumn<Transaction>[] = [
                                 label: 'Excluir transação',
                                 icon: 'i-lucide-trash',
                                 color: 'error',
+                                disabled:
+                                    row.original.category.name === 'Pagamento de Fatura' || row.original.invoice?.status === INVOICE_STATUS.PAID,
                                 onSelect: () => {
                                     modalDelete.open({
                                         transactionId: row.original.id,

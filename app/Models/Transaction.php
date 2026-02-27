@@ -35,7 +35,7 @@ class Transaction extends Model
         'deleted_at',
     ];
 
-    protected $with = ['wallet', 'category'];
+    protected $with = ['wallet', 'category', 'invoice'];
 
     protected function casts(): array
     {
