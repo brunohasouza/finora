@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BankController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\ForgotPasswordController;
 use App\Http\Controllers\ResetPasswordController;
 use App\Http\Controllers\TransactionController;
@@ -19,6 +20,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/accounts/list', [WalletController::class, 'list']);
     Route::resource('accounts', WalletController::class);
     Route::resource('banks', BankController::class);
+    Route::get('/invoices', [InvoiceController::class, 'index'])->name('invoices.index');
 });
 
 Route::middleware(['guest'])->group(function() {

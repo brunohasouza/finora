@@ -95,3 +95,19 @@ export type Balance = {
     expenses: number;
     incomes: number;
 };
+
+export type Invoice = {
+    id: number | string;
+    wallet: Account;
+    reference_date: Date | number | string;
+    closing_date: Date | number | string;
+    due_date: Date | number | string;
+    total: number;
+    status: INVOICE_STATUS;
+};
+
+export enum INVOICE_STATUS {
+    OPEN = 'open',
+    CLOSED = 'closed',
+    PAID = 'paid',
+}

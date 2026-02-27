@@ -22,14 +22,25 @@ class Invoice extends Model
         'status',
     ];
 
+    protected $hidden = [
+        'wallet_id',
+        'created_at',
+        'updated_at',
+        'deleted_at',
+    ];
+
     protected function casts(): array
     {
         return [
-            'reference_date' => 'date',
-            'closing_date' => 'date',
-            'due_date' => 'date',
+            'reference_date' => 'datetime:Y-m-d',
+            'closing_date' => 'datetime:Y-m-d',
+            'due_date' => 'datetime:Y-m-d',
         ];
     }
+
+    protected $with = ['wallet'];
+
+    protected $appends = ['reference_month'];
 
     public function wallet(): BelongsTo
     {
@@ -54,5 +65,10 @@ class Invoice extends Model
     public function isPaid(): bool
     {
         return $this->status === InvoiceStatus::PAID->value;
+    }
+
+    public function getReferenceMonthAttribute(): string
+    {
+        return $this->reference_date->format('M');
     }
 }

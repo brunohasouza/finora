@@ -43,5 +43,10 @@ const items: NavigationMenuItem[] = [
         icon: 'i-lucide-tag',
         to: '/categories',
     },
+    {
+        label: 'Faturas',
+        icon: 'i-lucide-receipt',
+        to: '/invoices',
+    },
 ];
 </script>
