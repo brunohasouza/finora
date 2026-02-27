@@ -15,8 +15,16 @@ class Category extends Model
         'name',
         'type',
         'color',
+        'system',
         'user_id',
     ];
+
+    protected $hidden = ['system'];
+
+    public function scopeVisible($query)
+    {
+        return $query->where('system', false);
+    }
 
     public function user()
     {

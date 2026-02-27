@@ -66,7 +66,7 @@ export type Account = {
     bank: Bank;
     balance: number;
     type: WALLET_TYPE;
-    credit_limit: number | null;
+    credit_limit: number;
     closing_day: number | null;
     due_day: number | null;
     created_at: Date | string;

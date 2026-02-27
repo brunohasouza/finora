@@ -21,6 +21,8 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('accounts', WalletController::class);
     Route::resource('banks', BankController::class);
     Route::get('/invoices', [InvoiceController::class, 'index'])->name('invoices.index');
+    Route::get('/invoices/{invoice}', [InvoiceController::class, 'show'])->name('invoices.show');
+    Route::post('/invoices/{invoice}/pay', [InvoiceController::class, 'pay'])->name('invoices.pay');
 });
 
 Route::middleware(['guest'])->group(function() {

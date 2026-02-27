@@ -11,7 +11,7 @@
             </UDashboardNavbar>
         </template>
         <template #body>
-            <div class="flex flex-wrap items-center gap-4">
+            <div class="flex flex-wrap gap-4">
                 <UCard variant="subtle" class="flex-2">
                     <div class="space-y-3">
                         <p class="text-base font-normal opacity-70">Saldo Total</p>

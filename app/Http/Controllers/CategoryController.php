@@ -14,7 +14,8 @@ class CategoryController extends Controller
     {
         $user = Auth::user();
 
-        $categories =  $user->categories()
+        $categories = $user->categories()
+            ->visible()
             ->latest()
             ->filter(request(['search', 'type']))
             ->paginate(10)
@@ -29,7 +30,7 @@ class CategoryController extends Controller
 
     public function list()
     {
-        $categories = Auth::user()->categories()->get();
+        $categories = Auth::user()->categories()->visible()->get();
         return response()->json($categories);
     }
 
